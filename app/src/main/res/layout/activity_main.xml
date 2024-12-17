@@ -7,46 +7,50 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Firebase Todo"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:padding="16dp"/>
+
+    <!-- TabLayout for Tabs -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="fixed"
+        android:layout_below="@id/tv_title"/>
+
+    <SearchView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:queryHint="Search Task"
+        android:id="@+id/sv"
+        android:iconifiedByDefault="false"
+        android:searchHintIcon="@null"
+        android:focusable="false"
+        android:searchIcon="@drawable/search"
+        android:closeIcon="@drawable/close"
+        android:background="?attr/colorPrimaryInverse"
+        android:layout_below="@id/tab_layout"
+        />
+
+<!--     ViewPager2 for Swiping Between Fragments -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="32dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Firebase Todo"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <SearchView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:queryHint="Search Task"
-            android:id="@+id/search"
-            android:iconifiedByDefault="false"
-            android:searchHintIcon="@null"
-            android:focusable="false"
-            android:searchIcon="@drawable/search"
-            android:closeIcon="@drawable/close"
-            android:background="@android:color/system_accent1_100"
-            />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_tasks"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
-    </LinearLayout>
+        android:layout_below="@id/sv" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginHorizontal="16dp"
         android:contentDescription="Add Task"
         app:srcCompat="@drawable/ic_add"
         android:layout_alignParentEnd="true"
