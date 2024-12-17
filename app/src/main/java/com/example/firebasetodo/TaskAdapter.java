@@ -68,28 +68,32 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
         });
 
         holder.deleteButton.setOnClickListener(v -> {
-            int deletePosition = holder.getBindingAdapterPosition();
-            Task task = tasks.get(deletePosition);
-
-            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
-
-            dbRef.child(task.getKey()).removeValue()
-                    .addOnCompleteListener(task1 -> {
-                        if (!task1.isSuccessful()) {
-                            Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
-                        } else {
-                            // Notify the adapter about the removed item
-                            holder.itemView.post(() -> {
-                                notifyItemRemoved(deletePosition);
-                                notifyItemRangeChanged(deletePosition, tasks.size());
-                            });
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
-                    });
+            deleteTask(holder);
         });
 
+    }
+
+    public void deleteTask(@NonNull RecyclerView.ViewHolder holder) {
+        int deletePosition = holder.getBindingAdapterPosition();
+        Task task = tasks.get(deletePosition);
+
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+
+        dbRef.child(task.getKey()).removeValue()
+                .addOnCompleteListener(task1 -> {
+                    if (!task1.isSuccessful()) {
+                        Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Notify the adapter about the removed item
+                        holder.itemView.post(() -> {
+                            notifyItemRemoved(deletePosition);
+                            notifyItemRangeChanged(deletePosition, tasks.size());
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
+                });
     }
 
     @Override
