@@ -17,9 +17,9 @@ public class TaskPagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         switch (position) {
-            case 1:
+            case 0:
                 return UndoneTasksFragment.newInstance();
-            case 2:
+            case 1:
                 return DoneTasksFragment.newInstance();
             default:
                 return AllTasksFragment.newInstance();

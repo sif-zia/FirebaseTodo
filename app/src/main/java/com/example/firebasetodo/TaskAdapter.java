@@ -41,30 +41,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
         }
 
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            int updatePosition = holder.getBindingAdapterPosition();
-            Task task = tasks.get(updatePosition);
-            task.setCompleted(isChecked);
-            tasks.set(updatePosition, task);
-
-            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
-
-            dbRef.child(task.getKey()).setValue(task)
-                    .addOnCompleteListener(task1 -> {
-                        if (!task1.isSuccessful()) {
-                            Toast.makeText(holder.itemView.getContext(), "Failed to update task", Toast.LENGTH_SHORT).show();
-                            task.setCompleted(!isChecked);
-                            tasks.set(updatePosition, task);
-
-                            holder.itemView.post(() -> notifyItemChanged(updatePosition));
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(holder.itemView.getContext(), "Failed to update task", Toast.LENGTH_SHORT).show();
-                        task.setCompleted(!isChecked);
-                        tasks.set(updatePosition, task);
-
-                        holder.itemView.post(() -> notifyItemChanged(updatePosition));
-                    });
+            updateTask(holder, isChecked);
         });
 
         holder.deleteButton.setOnClickListener(v -> {
@@ -93,6 +70,33 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    public void updateTask(@NonNull RecyclerView.ViewHolder holder, boolean isChecked) {
+        int updatePosition = holder.getBindingAdapterPosition();
+        Task task = tasks.get(updatePosition);
+        task.setCompleted(isChecked);
+        tasks.set(updatePosition, task);
+
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+
+        dbRef.child(task.getKey()).setValue(task)
+                .addOnCompleteListener(task1 -> {
+                    if (!task1.isSuccessful()) {
+                        Toast.makeText(holder.itemView.getContext(), "Failed to update task", Toast.LENGTH_SHORT).show();
+                        task.setCompleted(!isChecked);
+                        tasks.set(updatePosition, task);
+
+                        holder.itemView.post(() -> notifyItemChanged(updatePosition));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(holder.itemView.getContext(), "Failed to update task", Toast.LENGTH_SHORT).show();
+                    task.setCompleted(!isChecked);
+                    tasks.set(updatePosition, task);
+
+                    holder.itemView.post(() -> notifyItemChanged(updatePosition));
                 });
     }
 

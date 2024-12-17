@@ -1,7 +1,15 @@
 package com.example.firebasetodo.fragments;
 
+import static androidx.core.util.TypedValueCompat.dpToPx;
+
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -9,12 +17,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.SearchView;
-import android.widget.Toast;
 
 import com.example.firebasetodo.R;
 import com.example.firebasetodo.Task;
@@ -67,26 +69,7 @@ public class DoneTasksFragment extends Fragment {
         adapter = new TaskAdapter(tasks);
         recyclerView.setAdapter(adapter);
 
-        eventListener = dbRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                tasks.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Task task = dataSnapshot.getValue(Task.class);
-                    if(task != null && task.isCompleted()) {
-                        task.setKey(dataSnapshot.getKey());
-                        tasks.add(task);
-                    }
-                }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(requireContext(), "Failed to read tasks " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        fetchTasks();
         setupRecyclerViewSwipe();
 
         return view;
@@ -100,6 +83,28 @@ public class DoneTasksFragment extends Fragment {
         }
     }
 
+    private void fetchTasks() {
+        eventListener = dbRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                tasks.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Task task = dataSnapshot.getValue(Task.class);
+                    if (task != null && task.isCompleted()) {
+                        task.setKey(dataSnapshot.getKey());
+                        tasks.add(task);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(requireContext(), "Failed to read tasks " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void searchTask(String query) {
         ArrayList<Task> filteredTasks = new ArrayList<>();
         for (Task task : tasks) {
@@ -111,8 +116,8 @@ public class DoneTasksFragment extends Fragment {
         adapter.setTasks(filteredTasks);
     }
 
-    public void setupRecyclerViewSwipe() {
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+    private void setupRecyclerViewSwipe() {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
                                   @NonNull RecyclerView.ViewHolder target) {
@@ -123,15 +128,34 @@ public class DoneTasksFragment extends Fragment {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 // Handle the swipe action here
-                adapter.deleteTask(viewHolder); // Call a method to delete the item from your dataset
+                if (direction == ItemTouchHelper.LEFT) {
+                    adapter.updateTask(viewHolder, false);
+                } else {
+                    adapter.deleteTask(viewHolder);
+                }
             }
 
             @Override
             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
                                     @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    View itemView = viewHolder.itemView; // Get the swiped item's view
+                    Paint paint = new Paint();          // Set paint color to red
 
-                // Optional: Draw custom UI during the swipe action, e.g., background color or icon.
+                    float top = (float) itemView.getTop() + dpToPx(6f, getResources().getDisplayMetrics());
+                    float bottom = (float) itemView.getBottom() - dpToPx(6f, getResources().getDisplayMetrics());
+
+
+                    if (dX < 0) {
+                        paint.setColor(Color.CYAN);
+                        c.drawRect((float) itemView.getRight() + dX, top, (float) itemView.getRight(), bottom, paint);
+                    } else { // Swiping to the right (optional if needed)
+                        paint.setColor(Color.RED);
+                        c.drawRect((float) itemView.getLeft(), top,(float) itemView.getLeft() + dX, bottom, paint);
+                    }
+                }
+
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             }
         };
 

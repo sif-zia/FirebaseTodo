@@ -71,13 +71,13 @@ public class MainActivity extends AppCompatActivity {
                 (tab, position) -> {
                     switch (position) {
                         case 0:
-                            tab.setText("All");
-                            break;
-                        case 1:
                             tab.setText("Pending");
                             break;
-                        case 2:
+                        case 1:
                             tab.setText("Done");
+                            break;
+                        case 2:
+                            tab.setText("All");
                             break;
                     }
                 }).attach();
