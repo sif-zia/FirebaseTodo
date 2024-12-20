@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class AllTasksFragment extends Fragment {
 
@@ -34,6 +36,8 @@ public class AllTasksFragment extends Fragment {
     private ArrayList<Task> tasks = new ArrayList<>();
     private DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
     private ValueEventListener eventListener;
+
+    private TextView statusTextView;
 
     TaskViewModel taskViewModel;
 
@@ -56,6 +60,7 @@ public class AllTasksFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_all_tasks, container, false);
 
         listView = view.findViewById(R.id.lv_all_tasks);
+        statusTextView = view.findViewById(R.id.tv_status);
 
         taskViewModel = new ViewModelProvider(requireActivity()).get(TaskViewModel.class);
         taskViewModel.getSearchQuery().observe(getViewLifecycleOwner(), this::searchTask);
@@ -63,6 +68,7 @@ public class AllTasksFragment extends Fragment {
         adapter = new TaskListViewAdapter(tasks);
         listView.setAdapter(adapter);
 
+        statusTextView.setText("Loading tasks...");
         eventListener = dbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -72,12 +78,19 @@ public class AllTasksFragment extends Fragment {
                     if (task != null) task.setKey(dataSnapshot.getKey());
                     tasks.add(task);
                 }
+                tasks.sort(Comparator.comparing(Task::getCreatedAt).reversed());
                 adapter.notifyDataSetChanged();
+                if(tasks.isEmpty()) {
+                    statusTextView.setText("No tasks found");
+                } else {
+                    statusTextView.setVisibility(View.GONE);
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(requireContext(), "Failed to read tasks " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                statusTextView.setText("Failed to read tasks");
             }
         });
 

@@ -11,7 +11,7 @@
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Firebase Todo"
+        android:text="ZIM Todo"
         android:textSize="24sp"
         android:textStyle="bold"
         android:padding="16dp"/>
@@ -51,6 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
         android:contentDescription="Add Task"
         app:srcCompat="@drawable/ic_add"
         android:layout_alignParentEnd="true"

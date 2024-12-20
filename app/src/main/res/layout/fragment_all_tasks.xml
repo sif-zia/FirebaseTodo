@@ -5,16 +5,31 @@
     android:layout_height="match_parent"
     tools:context=".fragments.AllTasksFragment">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp">
+        android:layout_height="match_parent">
 
-        <ListView
-            android:id="@+id/lv_all_tasks"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp">
+
+            <ListView
+                android:id="@+id/lv_all_tasks"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
 
 </FrameLayout>

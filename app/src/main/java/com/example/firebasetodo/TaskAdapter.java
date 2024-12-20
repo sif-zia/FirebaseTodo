@@ -84,6 +84,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     // Dismiss the dialog
+                    notifyItemChanged(holder.getBindingAdapterPosition());
                     dialog.dismiss();
                 });
 
