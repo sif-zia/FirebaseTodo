@@ -1,16 +1,19 @@
 package com.example.firebasetodo;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -33,6 +36,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -98,8 +102,52 @@ public class MainActivity extends AppCompatActivity {
 
 
         addButton.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AddTask.class);
-            startActivity(intent);
+            createCustomDialog();
         });
+    }
+
+    private void createCustomDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.add_task_dialog, null);
+
+        EditText titleEditText = view.findViewById(R.id.etd_title);
+        EditText descriptionEditText = view.findViewById(R.id.etd_desc);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setView(view)
+                .setTitle("Add Task")
+                .setPositiveButton("Add", (dialog, which) -> {
+                    ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
+                    saveTask(titleEditText.getText().toString(), descriptionEditText.getText().toString(), dialog);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        builder.create().show();
+    }
+
+    public void saveTask(String title, String desc, DialogInterface dialog) {
+        if (title.isEmpty() || desc.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
+            return;
+        }
+
+        Task task = new Task(title, desc, LocalDateTime.now().toString()); // Use a simpler timestamp
+
+        FirebaseDatabase.getInstance().getReference("tasks")
+                .push()
+                .setValue(task)
+                .addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        Toast.makeText(this, "Task added successfully", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "Failed to add task", Toast.LENGTH_SHORT).show();
+                    }
+                    dialog.dismiss();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    dialog.dismiss();
+                });
     }
 }

@@ -1,5 +1,7 @@
 package com.example.firebasetodo;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,26 +53,41 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
     }
 
     public void deleteTask(@NonNull RecyclerView.ViewHolder holder) {
-        int deletePosition = holder.getBindingAdapterPosition();
-        Task task = tasks.get(deletePosition);
 
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+        AlertDialog.Builder builder = new AlertDialog.Builder(holder.itemView.getContext());
 
-        dbRef.child(task.getKey()).removeValue()
-                .addOnCompleteListener(task1 -> {
-                    if (!task1.isSuccessful()) {
-                        Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Notify the adapter about the removed item
-                        holder.itemView.post(() -> {
-                            notifyItemRemoved(deletePosition);
-                            notifyItemRangeChanged(deletePosition, tasks.size());
-                        });
-                    }
+        builder.setMessage("Are you sure you want to delete this task?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Delete the task
+                    int deletePosition = holder.getBindingAdapterPosition();
+                    Task task = tasks.get(deletePosition);
+
+                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+
+                    dbRef.child(task.getKey()).removeValue()
+                            .addOnCompleteListener(task1 -> {
+                                if (!task1.isSuccessful()) {
+                                    Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    // Notify the adapter about the removed item
+                                    holder.itemView.post(() -> {
+                                        notifyItemRemoved(deletePosition);
+                                        notifyItemRangeChanged(deletePosition, tasks.size());
+                                    });
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
+                            });
+
+                    dialog.dismiss();
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(holder.itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show();
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Dismiss the dialog
+                    dialog.dismiss();
                 });
+
+        builder.create().show();
     }
 
     public void updateTask(@NonNull RecyclerView.ViewHolder holder, boolean isChecked) {

@@ -1,5 +1,6 @@
 package com.example.firebasetodo;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,23 +71,33 @@ public class TaskListViewAdapter extends BaseAdapter {
     }
 
     public void deleteTask(int position, Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-        Task task = tasks.get(position);
+        builder.setMessage("Are you sure you want to delete this task?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    Task task = tasks.get(position);
 
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
 
-        dbRef.child(task.getKey()).removeValue()
-                .addOnCompleteListener(task1 -> {
-                    if (!task1.isSuccessful()) {
-                        Toast.makeText(context, "Failed to delete task", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Remove the task locally and notify the adapter
-                        notifyDataSetChanged();
-                    }
+                    dbRef.child(task.getKey()).removeValue()
+                            .addOnCompleteListener(task1 -> {
+                                if (!task1.isSuccessful()) {
+                                    Toast.makeText(context, "Failed to delete task", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    // Remove the task locally and notify the adapter
+                                    notifyDataSetChanged();
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(context, "Failed to delete task", Toast.LENGTH_SHORT).show();
+                            });
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(context, "Failed to delete task", Toast.LENGTH_SHORT).show();
+                .setNegativeButton("Cancel", (dialog, which) -> {
+                    // Dismiss the dialog
+                    dialog.dismiss();
                 });
+
+        builder.create().show();
     }
 
     public void updateTask(int position, boolean isChecked, Context context) {
