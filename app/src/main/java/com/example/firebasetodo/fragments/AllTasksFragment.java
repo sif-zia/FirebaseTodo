@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.firebasetodo.R;
 import com.example.firebasetodo.Task;
 import com.example.firebasetodo.TaskAdapter;
+import com.example.firebasetodo.TaskListViewAdapter;
 import com.example.firebasetodo.TaskViewModel;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,8 +29,8 @@ import java.util.ArrayList;
 
 public class AllTasksFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-    private TaskAdapter adapter;
+    private ListView listView;
+    private TaskListViewAdapter adapter;
     private ArrayList<Task> tasks = new ArrayList<>();
     private DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
     private ValueEventListener eventListener;
@@ -53,14 +55,13 @@ public class AllTasksFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_all_tasks, container, false);
 
-        recyclerView = view.findViewById(R.id.rv_all_tasks);
+        listView = view.findViewById(R.id.lv_all_tasks);
 
         taskViewModel = new ViewModelProvider(requireActivity()).get(TaskViewModel.class);
         taskViewModel.getSearchQuery().observe(getViewLifecycleOwner(), this::searchTask);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new TaskAdapter(tasks);
-        recyclerView.setAdapter(adapter);
+        adapter = new TaskListViewAdapter(tasks);
+        listView.setAdapter(adapter);
 
         eventListener = dbRef.addValueEventListener(new ValueEventListener() {
             @Override
