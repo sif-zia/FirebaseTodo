@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -66,6 +68,15 @@ public class TaskListViewAdapter extends BaseAdapter {
         deleteButton.setOnClickListener(v -> {
             deleteTask(i, viewGroup.getContext());
         });
+
+        int color = 0; // Use a fallback color for light mode if needed
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            color = ContextCompat.getColor(view.getContext(),
+                    view.getContext().getResources().getConfiguration().isNightModeActive()
+                            ? android.R.color.white
+                            : android.R.color.black);
+        }
+        deleteButton.setColorFilter(color);
 
         return view;
     }

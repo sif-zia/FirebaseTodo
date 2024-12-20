@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DatabaseReference;
@@ -50,6 +51,14 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
             deleteTask(holder);
         });
 
+        int color = 0; // Use a fallback color for light mode if needed
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            color = ContextCompat.getColor(holder.itemView.getContext(),
+                    holder.itemView.getContext().getResources().getConfiguration().isNightModeActive()
+                            ? android.R.color.white
+                            : android.R.color.black);
+        }
+        holder.deleteButton.setColorFilter(color);
     }
 
     public void deleteTask(@NonNull RecyclerView.ViewHolder holder) {
