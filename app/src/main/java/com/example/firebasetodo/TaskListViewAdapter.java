@@ -70,6 +70,7 @@ public class TaskListViewAdapter extends BaseAdapter {
             deleteTask(i, viewGroup.getContext());
         });
 
+        // Yah Nahi Daikhna
         int color = 0; // Use a fallback color for light mode if needed
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             color = ContextCompat.getColor(view.getContext(),

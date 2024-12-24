@@ -1,9 +1,12 @@
 package com.example.firebasetodo.fragments;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -20,6 +23,8 @@ import com.example.firebasetodo.Task;
 import com.example.firebasetodo.TaskAdapter;
 import com.example.firebasetodo.TaskListViewAdapter;
 import com.example.firebasetodo.TaskViewModel;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,16 +37,9 @@ import java.util.Comparator;
 
 public class AllTasksFragment extends Fragment {
 
-    private ListView listView;
-    private TaskListViewAdapter adapter;
-    private ArrayList<Task> tasks = new ArrayList<>();
-    private String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-    private DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks").child(uid);
-    private ValueEventListener eventListener;
-
-    private TextView statusTextView;
-
-    TaskViewModel taskViewModel;
+    private RecyclerView recyclerView;
+    private FirebaseRecyclerAdapter<Task, TaskViewHolder> adapter;
+    private DatabaseReference dbRef;
 
     public AllTasksFragment() {
         // Required empty public constructor
@@ -52,69 +50,93 @@ public class AllTasksFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_all_tasks, container, false);
 
-        listView = view.findViewById(R.id.lv_all_tasks);
-        statusTextView = view.findViewById(R.id.tv_status);
+        recyclerView = view.findViewById(R.id.rv_all_tasks);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        taskViewModel = new ViewModelProvider(requireActivity()).get(TaskViewModel.class);
-        taskViewModel.getSearchQuery().observe(getViewLifecycleOwner(), this::searchTask);
+        // Firebase Database reference
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        dbRef = FirebaseDatabase.getInstance().getReference("tasks").child(uid);
 
-        adapter = new TaskListViewAdapter(tasks);
-        listView.setAdapter(adapter);
+        // FirebaseRecyclerOptions
+        FirebaseRecyclerOptions<Task> options = new FirebaseRecyclerOptions.Builder<Task>()
+                .setQuery(dbRef, Task.class)
+                .build();
 
-        statusTextView.setText("Loading tasks...");
-        eventListener = dbRef.addValueEventListener(new ValueEventListener() {
+        // FirebaseRecyclerAdapter
+        adapter = new FirebaseRecyclerAdapter<Task, TaskViewHolder>(options) {
+            @NonNull
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                tasks.clear();
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Task task = dataSnapshot.getValue(Task.class);
-                    if (task != null) task.setKey(dataSnapshot.getKey());
-                    tasks.add(task);
-                }
-                tasks.sort(Comparator.comparing(Task::getCreatedAt).reversed());
-                adapter.notifyDataSetChanged();
-                if(tasks.isEmpty()) {
-                    statusTextView.setText("No tasks found");
-                } else {
-                    statusTextView.setVisibility(View.GONE);
-                }
+            public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View itemView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.task_item, parent, false);
+                return new TaskViewHolder(itemView);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(requireContext(), "Failed to read tasks " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                statusTextView.setText("Failed to read tasks");
+            protected void onBindViewHolder(@NonNull TaskViewHolder holder, int position, @NonNull Task model) {
+                holder.bind(model, dbRef.child(getRef(position).getKey()));
             }
-        });
+        };
+
+        recyclerView.setAdapter(adapter);
 
         return view;
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (eventListener != null) {
-            dbRef.removeEventListener(eventListener);
-        }
+    public void onStart() {
+        super.onStart();
+        adapter.startListening();
     }
 
-    private void searchTask(String query) {
-        ArrayList<Task> filteredTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getTitle().toLowerCase().contains(query.toLowerCase()) ||
-                    task.getDescription().toLowerCase().contains(query.toLowerCase())) {
-                filteredTasks.add(task);
-            }
+    @Override
+    public void onStop() {
+        super.onStop();
+        adapter.stopListening();
+    }
+
+    // ViewHolder class for RecyclerView
+    public static class TaskViewHolder extends RecyclerView.ViewHolder {
+        private final TextView titleTextView;
+        private final TextView descriptionTextView;
+        private final CheckBox checkBox;
+        private final ImageView deleteButton;
+
+        public TaskViewHolder(@NonNull View itemView) {
+            super(itemView);
+            titleTextView = itemView.findViewById(R.id.tv_title);
+            descriptionTextView = itemView.findViewById(R.id.tv_desc);
+            checkBox = itemView.findViewById(R.id.cb_done);
+            deleteButton = itemView.findViewById(R.id.btn_delete);
         }
-        adapter.setTasks(filteredTasks);
+
+        public void bind(Task task, DatabaseReference taskRef) {
+            titleTextView.setText(task.getTitle());
+            descriptionTextView.setText(task.getDescription());
+            checkBox.setChecked(task.isCompleted());
+
+            // Delete button visibility
+            deleteButton.setVisibility(task.isCompleted() ? View.VISIBLE : View.GONE);
+
+            // Update task completion
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                task.setCompleted(isChecked);
+                taskRef.setValue(task).addOnFailureListener(e ->
+                        Toast.makeText(itemView.getContext(), "Failed to update task", Toast.LENGTH_SHORT).show());
+            });
+
+            // Delete task
+            deleteButton.setOnClickListener(v -> new AlertDialog.Builder(itemView.getContext())
+                    .setMessage("Are you sure you want to delete this task?")
+                    .setPositiveButton("Yes", (dialog, which) -> taskRef.removeValue()
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(itemView.getContext(), "Failed to delete task", Toast.LENGTH_SHORT).show()))
+                    .setNegativeButton("Cancel", null)
+                    .show());
+        }
     }
 }

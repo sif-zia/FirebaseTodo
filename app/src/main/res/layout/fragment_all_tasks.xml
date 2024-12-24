@@ -15,11 +15,10 @@
             android:orientation="vertical"
             android:paddingHorizontal="16dp">
 
-            <ListView
-                android:id="@+id/lv_all_tasks"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_all_tasks"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:divider="@null" />
+                android:layout_height="match_parent" />
         </LinearLayout>
 
         <TextView

@@ -41,14 +41,15 @@
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/ll0"
-        app:tabMode="fixed" />
+        android:layout_alignParentBottom="true"
+        app:tabMode="fixed"
+        app:tabGravity="fill" />
 
     <SearchView
         android:id="@+id/sv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tab_layout"
+        android:layout_below="@id/ll0"
         android:layout_marginTop="16dp"
         android:background="?attr/colorPrimaryInverse"
         android:closeIcon="@drawable/close"
@@ -70,7 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/tab_layout"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="16dp"
         android:contentDescription="Add Task"
