@@ -50,4 +50,8 @@ dependencies {
     implementation("androidx.fragment:fragment:1.8.4")
 
     implementation("androidx.viewpager2:viewpager2:1.1.0")
+
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-auth")
 }

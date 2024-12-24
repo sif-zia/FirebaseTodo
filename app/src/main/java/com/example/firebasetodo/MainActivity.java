@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -46,8 +48,11 @@ public class MainActivity extends AppCompatActivity {
     ViewPager2 viewPager;
     TaskPagerAdapter pagerAdapter;
     SearchView searchView;
+    ImageView accountButton;
 
     TaskViewModel taskViewModel;
+
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tab_layout);
         viewPager = findViewById(R.id.view_pager);
         searchView = findViewById(R.id.sv);
+        accountButton = findViewById(R.id.iv_account);
 
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
@@ -100,9 +106,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         addButton.setOnClickListener(v -> {
             createCustomDialog();
+        });
+
+        accountButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AccountActivity.class);
+            startActivity(intent);
         });
     }
 
