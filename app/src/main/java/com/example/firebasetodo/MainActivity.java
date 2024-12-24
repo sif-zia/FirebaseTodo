@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
         Task task = new Task(title, desc, LocalDateTime.now().toString()); // Use a simpler timestamp
 
-        FirebaseDatabase.getInstance().getReference("tasks")
+        FirebaseDatabase.getInstance().getReference("tasks").child(mAuth.getCurrentUser().getUid())
                 .push()
                 .setValue(task)
                 .addOnCompleteListener(task1 -> {

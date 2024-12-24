@@ -20,6 +20,7 @@ import com.example.firebasetodo.Task;
 import com.example.firebasetodo.TaskAdapter;
 import com.example.firebasetodo.TaskListViewAdapter;
 import com.example.firebasetodo.TaskViewModel;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,7 +35,8 @@ public class AllTasksFragment extends Fragment {
     private ListView listView;
     private TaskListViewAdapter adapter;
     private ArrayList<Task> tasks = new ArrayList<>();
-    private DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+    private String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks").child(uid);
     private ValueEventListener eventListener;
 
     private TextView statusTextView;

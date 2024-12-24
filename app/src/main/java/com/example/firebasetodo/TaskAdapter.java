@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -71,7 +72,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
                     int deletePosition = holder.getBindingAdapterPosition();
                     Task task = tasks.get(deletePosition);
 
-                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks").child(uid);
 
                     dbRef.child(task.getKey()).removeValue()
                             .addOnCompleteListener(task1 -> {
@@ -106,7 +108,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskViewHolder> {
         task.setCompleted(isChecked);
         tasks.set(updatePosition, task);
 
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks").child(uid);
 
         dbRef.child(task.getKey()).setValue(task)
                 .addOnCompleteListener(task1 -> {

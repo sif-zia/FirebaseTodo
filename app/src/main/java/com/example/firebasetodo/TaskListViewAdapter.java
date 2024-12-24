@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -88,7 +89,8 @@ public class TaskListViewAdapter extends BaseAdapter {
                 .setPositiveButton("Yes", (dialog, which) -> {
                     Task task = tasks.get(position);
 
-                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+                    String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks").child(uid);
 
                     dbRef.child(task.getKey()).removeValue()
                             .addOnCompleteListener(task1 -> {
@@ -115,7 +117,8 @@ public class TaskListViewAdapter extends BaseAdapter {
         Task task = tasks.get(position);
         task.setCompleted(isChecked);
 
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks");
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("tasks").child(uid);
 
         dbRef.child(task.getKey()).setValue(task)
                 .addOnCompleteListener(task1 -> {
