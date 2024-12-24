@@ -36,15 +36,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- TabLayout for Tabs -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:tabMode="fixed"
-        app:tabGravity="fill" />
-
     <SearchView
         android:id="@+id/sv"
         android:layout_width="match_parent"
@@ -76,5 +67,14 @@
         android:layout_marginBottom="16dp"
         android:contentDescription="Add Task"
         app:srcCompat="@drawable/ic_add" />
+
+    <!-- TabLayout for Tabs -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:tabMode="fixed"
+        app:tabIndicatorGravity="top"/>
 
 </RelativeLayout>
